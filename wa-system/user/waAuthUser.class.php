@@ -77,6 +77,18 @@ class waAuthUser extends waUser
                         $auth->updateAuth($this->getCache());
                     }
                 }
+
+                if (isset($session_user['session_auth'])) {
+                    $contact_auth_model =  new waContactAuthsModel();
+                    $session_auth = !!$contact_auth_model->getSessionAuth($this->id);
+                    if (!$session_auth) {
+                        waSystem::getInstance()->getAuth()->clearAuth();
+                        header("Location: ".wa()->getConfig()->getRequestUrl(false));
+                        exit;
+                    }
+                    $contact_auth_model->updateLastDatetime($this->id);
+                }
+
             } catch (waException $e) {
                 // Contact is banned or deleted
                 $auth->clearAuth();
@@ -196,11 +208,16 @@ class waAuthUser extends waUser
     {
         // Update last datetime of the current user
         $this->updateLastTime('logout');
+
+        // Delete row from wa_contact_auth
+        (new waContactAuthsModel())->deleteContactAuth($this->id);
+
         // clear auth
         waSystem::getInstance()->getAuth()->clearAuth();
         $this->id = $this->data = null;
         $this->auth = false;
     }
+
 
     public function getTimezone($return_object=false)
     {

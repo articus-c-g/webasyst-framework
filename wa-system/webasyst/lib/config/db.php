@@ -110,6 +110,7 @@ return array(
         'session_id' => array('varchar', 255, 'null' => 0),
         'token' => array('varchar', 32, 'null' => 0),
         'login_datetime' => array('datetime'),
+        'last_datetime' => array('datetime'),
         'user_agent' => array('varchar', 255),
         ':keys' => array(
             'PRIMARY' => 'id',
@@ -119,6 +120,7 @@ return array(
             'contact_session_id' => array('contact_id', 'session_id', 'unique' => 1)
         ),
     ),
+
     'wa_contact_calendars' => array(
         'id' => array('int', 11, 'null' => 0, 'autoincrement' => 1),
         'name' => array('varchar', 255, 'null' => 0),
