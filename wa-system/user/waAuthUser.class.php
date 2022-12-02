@@ -71,22 +71,23 @@ class waAuthUser extends waUser
                 // Make sure user is not banned.
                 // We do this once in a while, or in case user data is already loaded anyway.
                 if ($is_data_loaded || $last_check >= 120 || defined('WA_STRICT_BAN_CHECK')) {
+
+                    if (isset($session_user['session_auth'])) {
+                        $contact_auth_model =  new waContactAuthsModel();
+                        $session_auth = !!$contact_auth_model->getSessionAuth($this->id);
+                        if (!$session_auth) {
+                            waSystem::getInstance()->getAuth()->clearAuth();
+                            header("Location: ".wa()->getConfig()->getRequestUrl(false));
+                            exit;
+                        }
+                        $contact_auth_model->updateLastDatetime($this->id);
+                    }
+
                     if ($this['is_user'] < 0) {
                         throw new waException('Contact is banned');
                     } else {
                         $auth->updateAuth($this->getCache());
                     }
-                }
-
-                if (isset($session_user['session_auth'])) {
-                    $contact_auth_model =  new waContactAuthsModel();
-                    $session_auth = !!$contact_auth_model->getSessionAuth($this->id);
-                    if (!$session_auth) {
-                        waSystem::getInstance()->getAuth()->clearAuth();
-                        header("Location: ".wa()->getConfig()->getRequestUrl(false));
-                        exit;
-                    }
-                    $contact_auth_model->updateLastDatetime($this->id);
                 }
 
             } catch (waException $e) {
